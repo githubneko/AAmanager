@@ -1,0 +1,447 @@
+/**
+ * 全局样式与主题变量。
+ *
+ * ## 主题机制
+ *
+ * 所有颜色都走 CSS 变量，`<html data-theme="...">` 切换整套色板。
+ * 组件内**不允许**出现硬编码颜色（波形画布除外，它的颜色来自
+ * `waveformTheme()` 读取的同一批变量）。
+ *
+ * ## 配色原则
+ *
+ * * 低饱和度：色相明确但不鲜艳，避免长时间使用造成视觉疲劳；
+ * * 深色主题统一用「近黑底 + 略亮面板 + 柔和文字」，对比度足够但不刺眼；
+ * * 浅色主题统一用「暖/冷白底 + 白面板 + 柔和边框」，避免纯白配纯黑；
+ * * 每套主题都有独立的语义色（成功/警告/危险/信息）与标签色。
+ */
+
+:root {
+  /* 字体与基础尺寸（不随主题变化） */
+  font-family: "Segoe UI", "Microsoft YaHei", system-ui, -apple-system, "Noto Sans SC", sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  --radius: 8px;
+}
+
+/* ========================================================================
+   深色 · 石墨（默认）
+   ======================================================================== */
+:root,
+[data-theme="graphite"] {
+  --bg: #101318;
+  --panel: #161a21;
+  --panel-raised: #1c2129;
+  --input-bg: #12151b;
+  --chip-bg: #202632;
+  --border: #262d38;
+  --border-soft: #1d232c;
+  --hover: #1b2129;
+  --selected: #1d2a39;
+  --accent: #7ba7cc;
+  --accent-contrast: #10161c;
+  --text: #dfe5ec;
+  --text-dim: #8d99a8;
+
+  --wave-bg: #12161c;
+  --wave-idle: #3a4553;
+  --wave-played: #7ba7cc;
+  --wave-head: #d8c08a;
+  --wave-grid: #242c36;
+
+  --tag-user-bg: #21313f;
+  --tag-user-fg: #9dc0d8;
+  --tag-user-border: #2f4557;
+  --tag-confirmed-bg: #1e3129;
+  --tag-confirmed-fg: #9ccbb2;
+  --tag-confirmed-border: #2c4a3c;
+  --tag-inherited-bg: #2a2637;
+  --tag-inherited-fg: #b6aed4;
+  --tag-inherited-border: #403a55;
+  --tag-auto-bg: var(--chip-bg);
+  --tag-auto-fg: var(--text-dim);
+  --tag-auto-border: var(--border);
+  --tag-low-border: #5c5334;
+
+  --ok-bg: #1a2f24;
+  --ok-fg: #9ccbb2;
+  --ok-border: #2c4a3c;
+  --warn-bg: #2f2a1a;
+  --warn-fg: #d8c08a;
+  --warn-border: #57502f;
+  --danger-bg: #33201f;
+  --danger-fg: #dba49c;
+  --danger-border: #5a3634;
+  --info-bg: #1d2a36;
+  --info-fg: #9dc0d8;
+  --info-border: #30455a;
+
+  --shadow-modal: 0 20px 60px rgba(0, 0, 0, 0.55);
+  --scrollbar-thumb: #2b3441;
+  --scrollbar-thumb-hover: #3a4657;
+  --overlay: rgba(10, 13, 17, 0.72);
+  color-scheme: dark;
+}
+
+/* ========================================================================
+   深色 · 靛蓝
+   ======================================================================== */
+[data-theme="midnight"] {
+  --bg: #0f131c;
+  --panel: #151a26;
+  --panel-raised: #1b2130;
+  --input-bg: #111623;
+  --chip-bg: #1f2637;
+  --border: #242c40;
+  --border-soft: #1b2233;
+  --hover: #1a2131;
+  --selected: #1c2942;
+  --accent: #8aa6d6;
+  --accent-contrast: #0f1520;
+  --text: #dee4f0;
+  --text-dim: #8b95ac;
+
+  --wave-bg: #101623;
+  --wave-idle: #38425c;
+  --wave-played: #8aa6d6;
+  --wave-head: #cfc194;
+  --wave-grid: #222b3e;
+
+  --tag-user-bg: #202c45;
+  --tag-user-fg: #a3bce2;
+  --tag-user-border: #2f3f60;
+  --tag-confirmed-bg: #1c2f37;
+  --tag-confirmed-fg: #9ac7d0;
+  --tag-confirmed-border: #2a4750;
+  --tag-inherited-bg: #292640;
+  --tag-inherited-fg: #b8b0dc;
+  --tag-inherited-border: #3e3a5e;
+  --tag-auto-bg: var(--chip-bg);
+  --tag-auto-fg: var(--text-dim);
+  --tag-auto-border: var(--border);
+  --tag-low-border: #565034;
+
+  --ok-bg: #182c30;
+  --ok-fg: #9ac7d0;
+  --ok-border: #294650;
+  --warn-bg: #2c2818;
+  --warn-fg: #cfc194;
+  --warn-border: #524c30;
+  --danger-bg: #31202a;
+  --danger-fg: #d6a2bd;
+  --danger-border: #563a4a;
+  --info-bg: #1c2438;
+  --info-fg: #a3bce2;
+  --info-border: #2e3c58;
+
+  --shadow-modal: 0 20px 60px rgba(0, 0, 0, 0.55);
+  --scrollbar-thumb: #2a3348;
+  --scrollbar-thumb-hover: #39445e;
+  --overlay: rgba(9, 12, 20, 0.72);
+  color-scheme: dark;
+}
+
+/* ========================================================================
+   深色 · 松绿
+   ======================================================================== */
+[data-theme="forest"] {
+  --bg: #101614;
+  --panel: #151d19;
+  --panel-raised: #1b2521;
+  --input-bg: #121a17;
+  --chip-bg: #1f2a25;
+  --border: #253029;
+  --border-soft: #1c2521;
+  --hover: #1a231f;
+  --selected: #1c2e26;
+  --accent: #8fbfa4;
+  --accent-contrast: #101713;
+  --text: #dee8e1;
+  --text-dim: #8b9a90;
+
+  --wave-bg: #111a16;
+  --wave-idle: #38473f;
+  --wave-played: #8fbfa4;
+  --wave-head: #d4c58f;
+  --wave-grid: #212c26;
+
+  --tag-user-bg: #1f3329;
+  --tag-user-fg: #a8d0b6;
+  --tag-user-border: #2e4a3a;
+  --tag-confirmed-bg: #1d3229;
+  --tag-confirmed-fg: #a3d2b8;
+  --tag-confirmed-border: #2c4c3b;
+  --tag-inherited-bg: #262f37;
+  --tag-inherited-fg: #b0c2cc;
+  --tag-inherited-border: #3a4750;
+  --tag-auto-bg: var(--chip-bg);
+  --tag-auto-fg: var(--text-dim);
+  --tag-auto-border: var(--border);
+  --tag-low-border: #55502f;
+
+  --ok-bg: #1b3128;
+  --ok-fg: #a3d2b8;
+  --ok-border: #2c4c3b;
+  --warn-bg: #2e2b19;
+  --warn-fg: #d4c58f;
+  --warn-border: #54502f;
+  --danger-bg: #32211f;
+  --danger-fg: #d8a79f;
+  --danger-border: #583834;
+  --info-bg: #1d2b2a;
+  --info-fg: #a8cec6;
+  --info-border: #2f4744;
+
+  --shadow-modal: 0 20px 60px rgba(0, 0, 0, 0.55);
+  --scrollbar-thumb: #2b3831;
+  --scrollbar-thumb-hover: #3a4a41;
+  --overlay: rgba(9, 14, 12, 0.72);
+  color-scheme: dark;
+}
+
+/* ========================================================================
+   浅色 · 晨雾
+   ======================================================================== */
+[data-theme="dawn"] {
+  --bg: #f4f6f9;
+  --panel: #ffffff;
+  --panel-raised: #ffffff;
+  --input-bg: #f7f9fb;
+  --chip-bg: #eef2f6;
+  --border: #dde3ea;
+  --border-soft: #e9eef3;
+  --hover: #f2f6fa;
+  --selected: #e6eef7;
+  --accent: #5f8cb4;
+  --accent-contrast: #ffffff;
+  --text: #26303a;
+  --text-dim: #6f7d8b;
+
+  --wave-bg: #f3f6f9;
+  --wave-idle: #c2ccd6;
+  --wave-played: #5f8cb4;
+  --wave-head: #b9975a;
+  --wave-grid: #e4eaf0;
+
+  --tag-user-bg: #e3edf7;
+  --tag-user-fg: #3f6386;
+  --tag-user-border: #c6dbee;
+  --tag-confirmed-bg: #e2f0e8;
+  --tag-confirmed-fg: #3f6f56;
+  --tag-confirmed-border: #c6e0d2;
+  --tag-inherited-bg: #ece9f6;
+  --tag-inherited-fg: #5d5386;
+  --tag-inherited-border: #d8d2ec;
+  --tag-auto-bg: var(--chip-bg);
+  --tag-auto-fg: var(--text-dim);
+  --tag-auto-border: var(--border);
+  --tag-low-border: #d8c48a;
+
+  --ok-bg: #e6f4ec;
+  --ok-fg: #33684c;
+  --ok-border: #c8e4d5;
+  --warn-bg: #fbf3e2;
+  --warn-fg: #7d6222;
+  --warn-border: #eadcb8;
+  --danger-bg: #fbeceb;
+  --danger-fg: #92403a;
+  --danger-border: #eed3d0;
+  --info-bg: #e9f1f9;
+  --info-fg: #3f6386;
+  --info-border: #cfe0ef;
+
+  --shadow-modal: 0 16px 44px rgba(38, 48, 58, 0.18);
+  --scrollbar-thumb: #ccd5de;
+  --scrollbar-thumb-hover: #b6c2ce;
+  --overlay: rgba(38, 48, 58, 0.32);
+  color-scheme: light;
+}
+
+/* ========================================================================
+   浅色 · 暖沙
+   ======================================================================== */
+[data-theme="sand"] {
+  --bg: #f8f5f0;
+  --panel: #fffdfa;
+  --panel-raised: #fffdfa;
+  --input-bg: #fbf9f5;
+  --chip-bg: #f1ece3;
+  --border: #e5ded1;
+  --border-soft: #eee9df;
+  --hover: #f7f3ec;
+  --selected: #f2e9dd;
+  --accent: #ab7f5e;
+  --accent-contrast: #ffffff;
+  --text: #35302a;
+  --text-dim: #7d746a;
+
+  --wave-bg: #f7f3ec;
+  --wave-idle: #d2c7b6;
+  --wave-played: #ab7f5e;
+  --wave-head: #a8894a;
+  --wave-grid: #eae3d7;
+
+  --tag-user-bg: #f4e8dc;
+  --tag-user-fg: #7d5334;
+  --tag-user-border: #e8d5c2;
+  --tag-confirmed-bg: #e9f0e4;
+  --tag-confirmed-fg: #526b41;
+  --tag-confirmed-border: #d5e3cb;
+  --tag-inherited-bg: #eee9f3;
+  --tag-inherited-fg: #61517d;
+  --tag-inherited-border: #ded4e8;
+  --tag-auto-bg: var(--chip-bg);
+  --tag-auto-fg: var(--text-dim);
+  --tag-auto-border: var(--border);
+  --tag-low-border: #d9c084;
+
+  --ok-bg: #eaf2e4;
+  --ok-fg: #4a6539;
+  --ok-border: #d4e3c9;
+  --warn-bg: #faf1de;
+  --warn-fg: #7d6222;
+  --warn-border: #ecd9b0;
+  --danger-bg: #fbecea;
+  --danger-fg: #93443c;
+  --danger-border: #eed2cd;
+  --info-bg: #f0ece3;
+  --info-fg: #6b6151;
+  --info-border: #e0d8c9;
+
+  --shadow-modal: 0 16px 44px rgba(53, 48, 42, 0.18);
+  --scrollbar-thumb: #d5cbbb;
+  --scrollbar-thumb-hover: #c0b4a2;
+  --overlay: rgba(53, 48, 42, 0.32);
+  color-scheme: light;
+}
+
+/* ========================================================================
+   浅色 · 薄荷
+   ======================================================================== */
+[data-theme="mint"] {
+  --bg: #f1f7f5;
+  --panel: #ffffff;
+  --panel-raised: #ffffff;
+  --input-bg: #f5faf8;
+  --chip-bg: #e8f1ee;
+  --border: #d6e5e0;
+  --border-soft: #e3eeea;
+  --hover: #eef6f3;
+  --selected: #dfeee9;
+  --accent: #5d9b87;
+  --accent-contrast: #ffffff;
+  --text: #23322e;
+  --text-dim: #6b7f79;
+
+  --wave-bg: #eff7f4;
+  --wave-idle: #bdd3cc;
+  --wave-played: #5d9b87;
+  --wave-head: #b09a56;
+  --wave-grid: #dfece7;
+
+  --tag-user-bg: #e0efe9;
+  --tag-user-fg: #3a6b5b;
+  --tag-user-border: #c6e0d7;
+  --tag-confirmed-bg: #e4f0e5;
+  --tag-confirmed-fg: #466b45;
+  --tag-confirmed-border: #cde0ce;
+  --tag-inherited-bg: #eae9f4;
+  --tag-inherited-fg: #595484;
+  --tag-inherited-border: #d8d5eb;
+  --tag-auto-bg: var(--chip-bg);
+  --tag-auto-fg: var(--text-dim);
+  --tag-auto-border: var(--border);
+  --tag-low-border: #d5c489;
+
+  --ok-bg: #e6f3ea;
+  --ok-fg: #35674a;
+  --ok-border: #c9e3d3;
+  --warn-bg: #faf3e1;
+  --warn-fg: #7b6224;
+  --warn-border: #ebe0b7;
+  --danger-bg: #fbeceb;
+  --danger-fg: #91433c;
+  --danger-border: #eed3d0;
+  --info-bg: #e7f1f4;
+  --info-fg: #3d6270;
+  --info-border: #cde0e6;
+
+  --shadow-modal: 0 16px 44px rgba(35, 50, 46, 0.18);
+  --scrollbar-thumb: #c8dcd5;
+  --scrollbar-thumb-hover: #b0c9c1;
+  --overlay: rgba(35, 50, 46, 0.32);
+  color-scheme: light;
+}
+
+/* ========================================================================
+   基础样式
+   ======================================================================== */
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  overflow: hidden;
+}
+
+body {
+  user-select: none;
+}
+
+input,
+textarea,
+code,
+.allow-select {
+  user-select: text;
+}
+
+/* 滚动条 */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 6px;
+  border: 2px solid var(--bg);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
+}
+
+/* 统一按钮与表单元素的字体 */
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+/* 主题切换时让背景色平滑过渡，避免闪白 */
+html {
+  transition: background-color 0.15s ease;
+}

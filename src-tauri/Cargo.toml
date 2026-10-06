@@ -1,0 +1,140 @@
+[package]
+# 包名 → 生成的可执行文件名 `aa-manager.exe`。
+# 面向用户的名字（安装程序、快捷方式、窗口标题）由
+# `tauri.conf.json` 的 `productName` = "AAmanager" 决定。
+name = "aa-manager"
+version = "0.1.0"
+description = "AAmanager —— 本地优先的音频资产管理器：自然语言搜索 + 自动标签"
+authors = ["AAmanager"]
+edition = "2021"
+# 与 package.json 的 license 字段保持一致；第三方组件的许可见仓库根目录的
+# THIRD-PARTY-NOTICES.md（含随包分发的 VC++ 运行库与 ONNX Runtime）。
+license = "MIT"
+repository = "https://github.com/<your-name>/AAmanager"
+# src/bin/ 下有若干开发期验证工具，必须显式指定默认二进制，
+# 否则 `cargo run`（tauri dev 走的正是它）会因「无法确定跑哪个」而失败。
+default-run = "aa-manager"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[lib]
+# The `_lib` suffix may seem redundant but it is necessary
+# to make the lib name unique and wouldn't conflict with the bin name.
+# This seems to be only an issue on Windows, see https://github.com/rust-lang/cargo/issues/8519
+name = "audio_asset_manager_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+# ---- Tauri ----
+tauri = { version = "2", features = [] }
+tauri-plugin-opener = "2"
+tauri-plugin-dialog = "2"
+
+# ---- 序列化 ----
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+# ---- 数据库 ----
+# bundled: 静态编译 SQLite，FTS5 默认开启，用户机器无需预装
+rusqlite = { version = "0.37", features = ["bundled"] }
+
+# ---- 音频解码 / 处理 ----
+symphonia = { version = "0.5", features = ["all"] }
+rubato = "0.16"
+rustfft = "6"
+hound = "3"
+
+# ---- 音频播放 ----
+rodio = { version = "0.21", default-features = false, features = ["playback", "symphonia-all"] }
+
+# ---- 其它 ----
+walkdir = "2"
+blake3 = "1"
+log = "0.4"
+thiserror = "2"
+
+# ---- 模型下载（流式 + 进度上报）----
+# rustls-tls 避免依赖系统 OpenSSL / Schannel，跨平台构建更省心
+reqwest = { version = "0.12", default-features = false, features = ["stream", "rustls-tls"] }
+futures-util = "0.3"
+tokio = { version = "1", features = ["fs", "rt", "macros"] }
+
+# ---- ONNX Runtime 推理 ----
+# download-binaries：构建时取预编译运行时并**静态链接进可执行文件**，
+# 因此最终用户不需要另行下载推理内核 —— 安装包即自带。
+# std 是必需的：`commit_from_file` 等基于文件的 API 在 std feature 下才编译。
+ort = { version = "=2.0.0-rc.10", default-features = false, features = [
+    "std",
+    "download-binaries",
+    "ndarray",
+] }
+ndarray = "0.16"
+# CLAP 文本塔用 RoBERTa 分词器（BPE + 字节级映射），用它避免手写 BPE
+tokenizers = { version = "0.21", default-features = false, features = ["onig"] }
+
+[features]
+default = []
+# 开发期验证工具（src/bin/*）。**默认不构建**，否则它们会被一起打进安装包 ——
+# 「先把工具塞进安装包」实测让产物从 32 MB 涨到 42 MB、多出 8 个 exe。
+# 需要时用：cargo build --features dev-tools --bin search_check
+dev-tools = []
+
+# ---- 开发期验证工具 ----
+# 每个都要求 `dev-tools` feature，保证 release 打包只产出主程序。
+[[bin]]
+name = "search_check"
+path = "src/bin/search_check.rs"
+required-features = ["dev-tools"]
+
+[[bin]]
+name = "inherit_check"
+path = "src/bin/inherit_check.rs"
+required-features = ["dev-tools"]
+
+[[bin]]
+name = "ast_dump"
+path = "src/bin/ast_dump.rs"
+required-features = ["dev-tools"]
+
+[[bin]]
+name = "e2e_check"
+path = "src/bin/e2e_check.rs"
+required-features = ["dev-tools"]
+
+[[bin]]
+name = "align_check"
+path = "src/bin/align_check.rs"
+required-features = ["dev-tools"]
+
+[[bin]]
+name = "text_dump"
+path = "src/bin/text_dump.rs"
+required-features = ["dev-tools"]
+
+[[bin]]
+name = "embed_dump"
+path = "src/bin/embed_dump.rs"
+required-features = ["dev-tools"]
+
+[[bin]]
+name = "mel_dump"
+path = "src/bin/mel_dump.rs"
+required-features = ["dev-tools"]
+
+[dev-dependencies]
+tempfile = "3"
+
+# Read the optimization guideline for more details: https://tauri.app/concept/size/#cargo-configuration
+[profile.release]
+codegen-units = 1
+lto = true
+opt-level = 3
+panic = "abort"
+strip = true
+
+# 单元测试需要展开 panic 才能看到失败信息
+[profile.test]
+opt-level = 1

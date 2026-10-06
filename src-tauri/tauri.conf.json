@@ -1,0 +1,63 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "AAmanager",
+  "version": "0.1.0",
+  "identifier": "com.aa-manager.app",
+  "build": {
+    "beforeDevCommand": "npm run dev",
+    "devUrl": "http://localhost:1420",
+    "beforeBuildCommand": "npm run build",
+    "frontendDist": "../build"
+  },
+  "app": {
+    "windows": [
+      {
+        "label": "main",
+        "title": "AAmanager",
+        "width": 1360,
+        "height": 860,
+        "minWidth": 960,
+        "minHeight": 600,
+        "resizable": true,
+        "center": true,
+        "dragDropEnabled": true
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": ["nsis"],
+    "publisher": "AAmanager",
+    "copyright": "© 2026 AAmanager",
+    "category": "Utility",
+    "shortDescription": "本地优先的音频资产管理器",
+    "longDescription": "AAmanager 是一个本地优先的音频资产管理器：自动标签、自然语言搜索、相似音频与相似度标签继承、在文件管理器中定位。所有分析与推理都在本机完成，不上传任何音频。",
+    "resources": {
+      "runtime/msvcp140.dll": "msvcp140.dll",
+      "runtime/msvcp140_1.dll": "msvcp140_1.dll",
+      "runtime/vcruntime140.dll": "vcruntime140.dll",
+      "runtime/vcruntime140_1.dll": "vcruntime140_1.dll"
+    },
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "windows": {
+      "webviewInstallMode": {
+        "type": "embedBootstrapper",
+        "silent": true
+      },
+      "nsis": {
+        "installMode": "currentUser",
+        "languages": ["SimpChinese", "English"],
+        "displayLanguageSelector": false
+      }
+    }
+  }
+}

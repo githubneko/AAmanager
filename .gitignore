@@ -1,0 +1,44 @@
+# ---- 依赖与构建产物 ----
+node_modules
+/build
+/.svelte-kit
+/package
+# Tauri 的 Rust 构建产物。默认在 src-tauri/target，
+# 但本机通过 CARGO_TARGET_DIR 指到了别处，两条都要忽略 ——
+# 否则换台机器 clone 下来一构建就会误提交好几个 GB。
+/src-tauri/target
+/src-tauri/gen/schemas
+# tauri icon 会为移动端生成整套目录，桌面项目用不到
+/src-tauri/icons/android
+/src-tauri/icons/ios
+
+# ---- 环境与本地配置 ----
+.env
+.env.*
+!.env.example
+vite.config.js.timestamp-*
+vite.config.ts.timestamp-*
+
+# ---- 编辑器 / 系统 ----
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+Thumbs.db
+*.swp
+*~
+
+# ---- 模型文件 ----
+# 模型合计约 625 MB，由用户在应用内按需下载；各自的许可归上游，
+# 不要提交进仓库。若你把模型放在默认目录之外，这里是兜底。
+*.onnx
+*.safetensors
+# 例外：开发期比对用的参考数据（体积小，值得版本化）
+!mel_reference.json
+
+# ---- 调试产物 ----
+*.log
+/page-state.json
+/cmd-queue.json
+/cmd-result.json
+/ui-report.json
