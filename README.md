@@ -1,8 +1,21 @@
-# 音频资产管理器（Audio Asset Manager）
+# AAmanager
 
-本地优先、离线可用的音频资产管理工具。核心价值是**用自然语言快速找到想要的音频**，并通过自动标签与用户备注让音频库自我组织。
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-面向游戏开发者、音效设计师与视频创作者。当前进度为策划书 **Phase 1（基础框架）已完成并验证**，并已预留 Phase 3-5 的接入点。
+本地优先、离线可用的音频资产管理器。核心价值是**用自然语言快速找到想要的音频**，并通过自动标签与用户备注让音频库自我组织。
+
+面向游戏开发者、音效设计师与视频创作者。**所有分析与推理都在本机完成，不上传任何音频。**
+
+```bash
+git clone https://github.com/githubneko/AAmanager.git
+cd AAmanager
+npm install
+npm run tauri dev
+```
+
+> 已实现：自动标签（规则引擎 + AST 事件分类）、自然语言语义搜索（CLAP）、
+> 相似音频与相似度标签继承、四套标签词汇表、在文件管理器中定位、NSIS 安装包。
+> 详见「[当前实现范围](#当前实现范围)」。
 
 ---
 
@@ -21,6 +34,7 @@
 - [开发约定](#开发约定)
 - [已知限制](#已知限制)
 - [后续阶段](#后续阶段)
+- [许可](#许可)
 
 ---
 
@@ -940,3 +954,17 @@ npm run check                  # 前端类型检查：0 错误 0 警告
 - [Tauri](https://tauri.app/) · [Symphonia](https://github.com/pdeljanov/Symphonia) · [rodio](https://github.com/RustAudio/rodio)
 - [rubato](https://github.com/HEnquist/rubato) · [rusqlite](https://github.com/rusqlite/rusqlite) · [SQLite FTS5](https://www.sqlite.org/fts5.html)
 - [ONNX Runtime](https://onnxruntime.ai/) · [CLAP](https://github.com/LAION-AI/CLAP) · [YAMNet](https://tfhub.dev/google/yamnet/1) · [sqlite-vec](https://github.com/asg017/sqlite-vec)
+
+---
+
+## 许可
+
+本项目以 **MIT** 许可发布，见 [LICENSE](LICENSE)。
+
+随安装包分发或运行时下载的第三方组件（ONNX Runtime、SQLite、
+Visual C++ 运行库、WebView2，以及 CLAP / AST 模型）的许可与署名要求，
+见 [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md)。
+
+> 特别注意：AST 模型为 **BSD 3-Clause**。本应用不打包模型，
+> 用户从上游仓库直接下载；若你要把模型打包进自己的发行版，
+> 必须一并附上 BSD 3-Clause 全文与 `Copyright (c) 2021, Yuan Gong`。

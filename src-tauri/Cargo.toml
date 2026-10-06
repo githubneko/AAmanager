@@ -10,7 +10,7 @@ edition = "2021"
 # 与 package.json 的 license 字段保持一致；第三方组件的许可见仓库根目录的
 # THIRD-PARTY-NOTICES.md（含随包分发的 VC++ 运行库与 ONNX Runtime）。
 license = "MIT"
-repository = "https://github.com/<your-name>/AAmanager"
+repository = "https://github.com/githubneko/AAmanager"
 # src/bin/ 下有若干开发期验证工具，必须显式指定默认二进制，
 # 否则 `cargo run`（tauri dev 走的正是它）会因「无法确定跑哪个」而失败。
 default-run = "aa-manager"
