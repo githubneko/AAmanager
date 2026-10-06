@@ -86,11 +86,26 @@
 | --- | --- | --- |
 | Node.js | ≥ 20 | 前端构建 |
 | Rust | ≥ 1.77 | 后端（`stable-x86_64-pc-windows-msvc`） |
-| MSVC 生成工具 | VS 2022 | Windows 上 Rust 链接所需（含 Windows SDK） |
-| WebView2 Runtime | 任意 | Windows 10/11 通常已内置 |
+| MSVC 生成工具 | VS 2022 | Windows 上 Rust 链接所需（含 Windows SDK）；只需「使用 C++ 的桌面开发」工作负载 |
+| WebView2 Runtime | 任意 | Win11 自带；Win10 由安装程序负责安装 |
 
 > 本机已验证环境：Node v22.23.1、Rust 1.99.0、MSVC 14.44、Windows SDK 10.0.22621、WebView2 154.x。
-> Rust 与 MSVC 安装在 `E:\rust`、`E:\BuildTools`，构建产物在 `E:\rust\target`。
+
+**建议把工具链和构建产物放到空间充裕的盘**（完整构建约需 10 GB）：
+
+```powershell
+$env:CARGO_HOME       = 'E:\rust\cargo'
+$env:RUSTUP_HOME      = 'E:\rust\rustup'
+$env:CARGO_TARGET_DIR = 'E:\rust\target'
+```
+
+只需重装工具链时用 rustup 默认安装器即可，`Cargo.lock` 会锁定全部 624 个依赖的精确版本，
+因此**构建结果可复现**：
+
+```powershell
+# 装到指定目录（不改 PATH 也可以，用绝对路径调用）
+rustup-init.exe -y --no-modify-path --default-toolchain stable --profile minimal
+```
 
 ### 安装依赖
 
@@ -128,6 +143,67 @@ npm run tauri build
 > 为什么安装包只有 8.6 MB，而主程序有 32 MB？NSIS 用 LZMA 压缩，
 > 而 ONNX Runtime 的静态库压缩率很高。**模型文件不在安装包里** ——
 > 那是 625 MB，且并非所有用户都需要（见「运行时与模型的分发方式」）。
+
+#### 目标机器需要什么（已实测核对）
+
+安装包**不需要用户额外安装任何小众依赖**，但有两处依赖系统组件。
+这两条是通过**解析成品 exe 的 PE 导入表**确认的，不是推测：
+
+| 依赖 | 状态 | 处理方式 |
+| --- | --- | --- |
+| ONNX Runtime | ✅ 已静态链接进 exe | 无需用户操作 |
+| SQLite | ✅ 已静态编译进 exe | 无需用户操作 |
+| Python | ✅ 已完全移除（纯 Rust 分词） | 无需用户操作 |
+| **Visual C++ 运行库** | ⚠️ 曾缺失 | 已把 4 个 DLL 随包分发（见下） |
+| **WebView2** | ⚠️ 曾需联网 | 已改为内嵌引导器（见下） |
+
+**Visual C++ 运行库**：ONNX Runtime 是 C++ 写的，静态链接后仍会**静态导入**
+`MSVCP140.dll` / `MSVCP140_1.dll`（延迟加载表为空，缺一个进程就起不来）。
+`static_vcruntime` 只能解决 C 运行库，解决不了 C++ 标准库，因此改为随包分发：
+
+```
+src-tauri/runtime/          共 750 KB，随安装包分发到 exe 同级目录
+├── msvcp140.dll            544.7 KB   ← exe 直接导入
+├── msvcp140_1.dll           35.1 KB   ← exe 直接导入
+├── vcruntime140.dll        121.6 KB   ← 上面两个的依赖
+└── vcruntime140_1.dll       48.6 KB   ← msvcp140 的依赖
+```
+
+传递依赖已逐个用 PE 导入表核对过，无遗漏。Windows 会优先加载 exe 同目录的 DLL，
+因此这 4 个文件放对位置即可，不影响系统里已装的其它版本。
+
+**WebView2**：Tauri 默认是 `downloadBootstrapper`（装的时候去微软服务器下载），
+断网就装不上。现在改成 `embedBootstrapper` —— 安装包内嵌微软引导器，
+离线也能装（Windows 11 本来就自带，不会触发下载）。
+
+> 验证方法：仓库里的 `tools/pe_imports.py` 会正经解析 PE 导入表列出非系统 DLL。
+> 每次构建后跑一次就能提前发现这类问题：
+> ```powershell
+> python tools/pe_imports.py target/release/aa-manager.exe
+> ```
+
+#### 平台支持
+
+**目前仅构建与验证 Windows x64。** 代码本身是**跨平台设计**的：
+
+* 所有平台相关逻辑都用 `#[cfg(windows)]` 隔离并写了非 Windows 分支
+  （`src/utils/paths.rs` 的数据目录、`src/ml/downloader.rs` 的注册表代理探测、
+  `src/commands/audio.rs` 的文件管理器定位）；
+* 依赖都是跨平台的：`rodio` → `cpal`（Windows WASAPI / macOS CoreAudio）、
+  `symphonia` / `rubato` / `rustfft` 为纯 Rust、`ort` 支持 macOS、
+  `rusqlite` 的 bundled SQLite 在 macOS 上同样可编译。
+
+因此 **macOS 不是「需要重构」，而是「需要一轮移植 + 验证」**，工作量集中在：
+
+1. `reveal_in_file_manager` 在 macOS 上要改用 Finder 的选中接口
+   （当前非 Windows 分支只返回「不支持」）；
+2. 音频输出、数据目录、代理探测三处的非 Windows 分支从未在真机跑过；
+3. macOS 需要代码签名与公证，否则用户首次打开会被 Gatekeeper 拦下 ——
+   这需要 Apple 开发者账号（每年 99 美元）。
+
+**结论：暂不做。** 不是因为难，而是**没有 Mac 可验证** ——
+本项目的做法是每个结论都要有实测证据（见「开发期验证脚本」），
+在没有目标平台的情况下无法提供可信的 macOS 构建。
 
 #### 命名与版本
 
@@ -845,8 +921,17 @@ npm run check                  # 前端类型检查：0 错误 0 警告
 | Phase 3 | AST 接入 → 类别自动标签 | ✅ **已完成**：特征与官方逐点一致（偏差 0.00104），分类结果与 PyTorch 参考吻合 |
 | Phase 4 | 相似度继承推荐标签 | ✅ **已完成**：`ml/inherit.rs`，端到端实测相似变体置信度 0.983/0.984，无关音频未受影响 |
 | Phase 5 | CLAP 语义搜索 | ✅ **已完成**：纯 Rust 推理，与 PyTorch 逐位一致；带置信度门槛 |
-| Phase 6 | 打磨发布 | 设置界面、模式切换已完成；待做安装包签名与用户文档 |
+| Phase 6 | 打磨发布 | ✅ **已完成**：NSIS 安装包（免管理员、中文界面、卸载不删资料库）、应用图标、依赖自足性已用 PE 导入表核对 |
 | 扩展 | 批量重命名、CSV/JSON 导出、音频指纹 | 暂无 |
+| 平台 | macOS 移植 | 代码已跨平台隔离，但**缺 Mac 实机验证**，暂不做（见「平台支持」） |
+
+### 尚未做的两件事
+
+| 项目 | 说明 |
+| --- | --- |
+| **安装包代码签名** | 当前安装包**未签名**，用户首次运行会被 SmartScreen 拦截（「Windows 已保护你的电脑」）。需要购买代码签名证书（OV 约 $200/年，EV 约 $400/年）。不签名也能用，只是首次要多点一次「仍要运行」。 |
+| **自动更新** | 未接入 `tauri-plugin-updater`。目前的更新方式是用户重新下载安装包覆盖安装（资料库不受影响）。 |
+
 
 ---
 
